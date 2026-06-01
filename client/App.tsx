@@ -126,10 +126,15 @@ function groupNotifications(notifications: Notification[]): NotificationGroup[] 
 
 function getOrCreateDeviceId(): string {
   const stored = localStorage.getItem(DEVICE_KEY);
-  if (stored) return stored;
 
-  const created = crypto.randomUUID();
+  if (stored) {
+    return stored;
+  }
+
+  const created = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
   localStorage.setItem(DEVICE_KEY, created);
+
   return created;
 }
 
