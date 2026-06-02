@@ -220,6 +220,24 @@ function AppBadge({ app }: { app: string }) {
   );
 }
 
+function BatteryIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
+      <rect x="1" y="6" width="18" height="12" rx="2" />
+      <line x1="23" y1="13" x2="23" y2="11" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
 function Pill({ children, tone = 'muted' }: { children: React.ReactNode; tone?: 'muted' | 'hot' | 'green' | 'blue' }) {
   const styles: Record<string, React.CSSProperties> = {
     muted: { background: '#191b16', color: '#8c9081', border: '1px solid #2a2d25' },
@@ -261,8 +279,10 @@ function NotifCard({ notif, isRead, onRead }: { notif: Notification; isRead: boo
           </div>
           <div style={{ fontSize: 11, color: '#65695d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{notif.app}</div>
         </div>
-        {battery && <Pill tone="hot">{battery}</Pill>}
-        <Pill>{relativeTime(notif.timestamp)}</Pill>
+        <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+          {battery && <Pill tone="hot"><BatteryIcon />{battery}</Pill>}
+          <Pill><ClockIcon />{relativeTime(notif.timestamp)}</Pill>
+        </div>
       </div>
 
       {notif.title && (
@@ -317,10 +337,12 @@ function GroupCard({ group, readMap, onRead, expandedKey, onToggleExpand }: {
           </div>
           <div style={{ fontSize: 11, color: '#65695d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.app}</div>
         </div>
-        {battery && <Pill tone="hot">{battery}</Pill>}
-        <Pill tone="blue">{isExpanded ? 'open' : 'stack'} {group.items.length}</Pill>
-        {unreadCount > 0 && <Pill tone="green">{unreadCount} new</Pill>}
-        <Pill>{relativeTime(latest.timestamp)}</Pill>
+        <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+          <Pill tone="blue">{isExpanded ? 'open' : 'stack'} {group.items.length}</Pill>
+          {unreadCount > 0 && <Pill tone="green">{unreadCount} new</Pill>}
+          {battery && <Pill tone="hot"><BatteryIcon />{battery}</Pill>}
+          <Pill><ClockIcon />{relativeTime(latest.timestamp)}</Pill>
+        </div>
       </div>
 
       {!isExpanded && (
