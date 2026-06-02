@@ -238,6 +238,16 @@ function ClockIcon() {
   );
 }
 
+function StackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
+      <rect x="3" y="10" width="18" height="10" rx="2" />
+      <rect x="7" y="6" width="10" height="2" rx="1" />
+      <rect x="10" y="2" width="4" height="2" rx="1" />
+    </svg>
+  );
+}
+
 function Pill({ children, tone = 'muted' }: { children: React.ReactNode; tone?: 'muted' | 'hot' | 'green' | 'blue' }) {
   const styles: Record<string, React.CSSProperties> = {
     muted: { background: '#191b16', color: '#8c9081', border: '1px solid #2a2d25' },
@@ -322,40 +332,141 @@ function GroupCard({ group, readMap, onRead, expandedKey, onToggleExpand }: {
   }
 
   return (
-    <div style={{
-      borderLeft: `3px solid ${ageBorderColor(group.app, group.timestamp, allRead)}`,
-      background: allRead ? '#10110e' : 'linear-gradient(135deg, #171914 0%, #10110e 72%)',
-    }}>
-      <div onClick={handleToggle} style={{ padding: '15px 16px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11 }}>
+    <div
+      style={{
+        position: 'relative',
+        borderLeft: `3px solid ${ageBorderColor(group.app, group.timestamp, allRead)}`,
+        background: allRead
+          ? '#10110e'
+          : 'linear-gradient(135deg, #171914 0%, #10110e 72%)',
+      }}
+    >
+      <div
+        onClick={handleToggle}
+        style={{
+          padding: '15px 16px 10px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 11,
+        }}
+      >
         <AppBadge app={group.app} />
+
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <span style={{ fontSize: 13, color: allRead ? '#65695d' : '#d8ff6d', fontWeight: 850, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              minWidth: 0,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                color: allRead ? '#65695d' : '#d8ff6d',
+                fontWeight: 850,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flex: 1,
+              }}
+            >
               {group.sender}
             </span>
-            {unreadCount > 0 && <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#d8ff6d', flexShrink: 0 }} />}
+
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: '#d8ff6d',
+                  flexShrink: 0,
+                }}
+              />
+            )}
           </div>
-          <div style={{ fontSize: 11, color: '#65695d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.app}</div>
+
+          <div
+            style={{
+              fontSize: 11,
+              color: '#65695d',
+              marginTop: 2,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {group.app}
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
-          <Pill tone="blue">{isExpanded ? 'open' : 'stack'} {group.items.length}</Pill>
-          {unreadCount > 0 && <Pill tone="green">{unreadCount} new</Pill>}
-          {battery && <Pill tone="hot"><BatteryIcon />{battery}</Pill>}
-          <Pill><ClockIcon />{relativeTime(latest.timestamp)}</Pill>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            flexShrink: 0,
+          }}
+        >
+          {group.items.length > 1 && (
+            <Pill>
+              <StackIcon />
+              {group.items.length}
+            </Pill>
+          )}
+
+          {battery && (
+            <Pill tone="hot">
+              <BatteryIcon />
+              {battery}
+            </Pill>
+          )}
+
+          <Pill>
+            <ClockIcon />
+            {relativeTime(latest.timestamp)}
+          </Pill>
         </div>
       </div>
 
       {!isExpanded && (
-        <div style={{ padding: '0 16px 15px 61px', fontSize: 14, color: ageColor(latest.timestamp, allRead), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div
+          style={{
+            padding: '0 16px 15px 61px',
+            fontSize: 14,
+            color: ageColor(latest.timestamp, allRead),
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {latest.content}
         </div>
       )}
 
       {isExpanded && (
-        <div style={{ borderTop: '1px solid #252820', marginTop: 3 }}>
+        <div
+          style={{
+            borderTop: '1px solid #252820',
+            marginTop: 3,
+          }}
+        >
           {group.items.map((notification: Notification) => (
-            <div key={notification.id} style={{ paddingLeft: 18, borderBottom: '1px solid #171914' }}>
-              <NotifCard notif={notification} isRead={!!readMap[notification.id]} onRead={() => onRead(notification.id)} />
+            <div
+              key={notification.id}
+              style={{
+                paddingLeft: 18,
+                borderBottom: '1px solid #171914',
+              }}
+            >
+              <NotifCard
+                notif={notification}
+                isRead={!!readMap[notification.id]}
+                onRead={() => onRead(notification.id)}
+              />
             </div>
           ))}
         </div>
