@@ -168,6 +168,11 @@ function NotifCard({ notif, isRead, onRead }: { notif: Notification; isRead: boo
         <span style={{ fontSize: 11, color: isRead ? '#4b5563' : '#9ca3af', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {notif.sender}
         </span>
+        {notif.battery && (
+          <span style={{ fontSize: 10, color: '#f59e0b', background: '#451a03', padding: '1px 5px', borderRadius: 3, flexShrink: 0 }}>
+            {notif.battery}
+          </span>
+        )}
         <span style={{ fontSize: 10, color: '#374151', flexShrink: 0 }}>{relativeTime(notif.timestamp)}</span>
         {!isRead && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />}
       </div>
