@@ -8,8 +8,8 @@ export const ingestRouter = Router();
 ingestRouter.post('/ingest', (request, response) => {
   const body = request.body as Partial<IngestPayload>;
 
-  if (!body.app || !body.sender || !body.content || typeof body.timestamp !== 'number') {
-    response.status(400).json({ error: 'app, sender, content, and timestamp are required' });
+  if (!body.app || !body.sender || !body.content) {
+    response.status(400).json({ error: 'app, sender, and content are required' });
     return;
   }
 
@@ -18,8 +18,9 @@ ingestRouter.post('/ingest', (request, response) => {
     sender: body.sender,
     title: body.title || null,
     content: body.content,
-    timestamp: body.timestamp,
+    timestamp: Date.now(),
     channel: body.channel || null,
+    battery: body.battery || null,
   });
 
   broadcastNotification(notification);

@@ -6,6 +6,7 @@ export interface Notification {
   content: string;
   timestamp: number;
   channel: string | null;
+  battery: string | null;
   received_at: number;
   is_read: boolean;
 }
@@ -32,6 +33,7 @@ export interface IngestPayload {
   content: string;
   timestamp: number;
   channel?: string | null;
+  battery?: string | null;
 }
 
 export type SSEEvent =

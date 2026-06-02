@@ -30,6 +30,7 @@ db.exec(`
     content     TEXT NOT NULL,
     timestamp   INTEGER NOT NULL,
     channel     TEXT,
+    battery     TEXT,
     received_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
   );
 
@@ -88,8 +89,8 @@ export function deleteChannel(name: string): void {
 export function insertNotification(payload: IngestPayload): Notification {
   const result = db
     .prepare(`
-      INSERT INTO notifications (app, sender, title, content, timestamp, channel)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO notifications (app, sender, title, content, timestamp, channel, battery)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       payload.app,
@@ -98,6 +99,7 @@ export function insertNotification(payload: IngestPayload): Notification {
       payload.content,
       payload.timestamp,
       payload.channel || null,
+      payload.battery || null,
     );
 
   const row = db
@@ -110,6 +112,7 @@ export function insertNotification(payload: IngestPayload): Notification {
         content,
         timestamp,
         channel,
+        battery,
         received_at,
         0 AS is_read
       FROM notifications
@@ -159,6 +162,7 @@ export function getNotifications(options: GetNotificationsOptions): Notification
         n.content,
         n.timestamp,
         n.channel,
+        n.battery,
         n.received_at,
         CASE WHEN r.notification_id IS NULL THEN 0 ELSE 1 END AS is_read
       FROM notifications n
