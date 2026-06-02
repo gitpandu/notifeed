@@ -786,31 +786,13 @@ export default function App() {
             {!isMobile && <div style={{ fontSize: 12, color: '#65695d', marginTop: 2 }}>{visibleGroups.length} groups · {filteredUnread} unread</div>}
           </div>
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="search app, sender, title, content" style={{ ...inputStyle, flex: 1, minWidth: 0 }} />
-          {!isMobile && (
-            <div style={{ display: 'flex', gap: 7, flexShrink: 0, maxWidth: 420, overflowX: 'auto' }}>
-              {appsInView.map((app: string) => {
-                const collapsed = collapsedApps.has(app);
-                return (
-                  <button key={app} onClick={() => toggleCollapseApp(app)} title={collapsed ? `show ${app}` : `hide ${app}`} style={{
-                    background: collapsed ? '#11130f' : appColor(app) + '18',
-                    border: `1px solid ${collapsed ? '#2a2d25' : appColor(app) + '66'}`,
-                    color: collapsed ? '#65695d' : appColor(app),
-                    padding: '8px 11px', borderRadius: 999, cursor: 'pointer',
-                    fontSize: 12, fontFamily: 'inherit', fontWeight: 800,
-                    textDecoration: collapsed ? 'line-through' : 'none',
-                    whiteSpace: 'nowrap',
-                  }}>{app}</button>
-                );
-              })}
-            </div>
-          )}
           {!isMobile && <button onClick={markAllRead} style={{ ...btnGhostStyle, flexShrink: 0 }}>mark all read</button>}
           {isMobile && totalUnread > 0 && <Pill tone="green">{totalUnread}</Pill>}
           {isMobile && <button onClick={markAllRead} style={{ ...btnGhostStyle, flexShrink: 0 }}>read</button>}
         </header>
 
-        {isMobile && appsInView.length > 0 && (
-          <div style={{ display: 'flex', gap: 7, padding: '10px 12px', borderBottom: '1px solid #24271f', background: '#0b0c0a', overflowX: 'auto', flexShrink: 0 }}>
+        {appsInView.length > 0 && (
+          <div style={{ display: 'flex', gap: 7, padding: isMobile ? '10px 12px' : '10px 22px', borderBottom: '1px solid #24271f', background: '#0b0c0a', overflowX: 'auto', flexShrink: 0 }}>
             {appsInView.map((app: string) => {
               const collapsed = collapsedApps.has(app);
               return (
