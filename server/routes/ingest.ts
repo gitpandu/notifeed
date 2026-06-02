@@ -20,7 +20,7 @@ ingestRouter.post('/ingest', (request, response) => {
     content: body.content,
     timestamp: Date.now(),
     channel: body.channel || null,
-    battery: body.battery || null,
+    battery: body.battery ? `${body.battery}%` : null,
   });
 
   broadcastNotification(notification);

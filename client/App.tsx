@@ -12,11 +12,66 @@ const GROUP_WINDOW = 120 * 1000;
 const DEVICE_KEY = 'notifeed_device_id';
 
 const APP_COLORS: Record<string, string> = {
-  WhatsApp: '#25d366',
-  Gmail: '#ea4335',
-  Telegram: '#2aabee',
-  Slack: '#e01e5a',
-  SMS: '#a78bfa',
+  WhatsApp: '#2fd47f',
+  Gmail: '#f06464',
+  Telegram: '#4cb3ff',
+  Slack: '#e36ad6',
+  SMS: '#b99cff',
+};
+
+const pageStyle: React.CSSProperties = {
+  display: 'flex',
+  height: '100vh',
+  background: '#0b0c0a',
+  color: '#f4f0e8',
+  fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  overflow: 'hidden',
+  position: 'relative',
+};
+
+const inputStyle: React.CSSProperties = {
+  background: '#151713',
+  border: '1px solid #2a2d25',
+  color: '#f4f0e8',
+  padding: '9px 11px',
+  fontSize: 13,
+  borderRadius: 10,
+  fontFamily: 'inherit',
+  outline: 'none',
+};
+
+const selectStyle: React.CSSProperties = {
+  background: '#151713',
+  border: '1px solid #2a2d25',
+  color: '#a7aa9b',
+  padding: '8px 10px',
+  fontSize: 12,
+  borderRadius: 10,
+  fontFamily: 'inherit',
+  outline: 'none',
+};
+
+const btnGhostStyle: React.CSSProperties = {
+  background: '#11130f',
+  border: '1px solid #2a2d25',
+  color: '#a7aa9b',
+  padding: '8px 12px',
+  borderRadius: 999,
+  cursor: 'pointer',
+  fontSize: 12,
+  fontFamily: 'inherit',
+};
+
+const btnPrimaryStyle: React.CSSProperties = {
+  background: '#d8ff6d',
+  border: 'none',
+  color: '#11130f',
+  padding: '8px 13px',
+  borderRadius: 999,
+  cursor: 'pointer',
+  fontSize: 12,
+  fontWeight: 800,
+  fontFamily: 'inherit',
 };
 
 function relativeTime(timestamp: number): string {
@@ -32,15 +87,15 @@ function ageRatio(timestamp: number): number {
 }
 
 function ageColor(timestamp: number, isRead: boolean): string {
-  if (isRead) return '#374151';
+  if (isRead) return '#65695d';
 
   const t = ageRatio(timestamp);
   const lerp = (a: number, b: number) => Math.round(a + (b - a) * t).toString(16).padStart(2, '0');
-  return `#${lerp(0xc9, 0x4b)}${lerp(0xd1, 0x55)}${lerp(0xdb, 0x63)}`;
+  return `#${lerp(0xf4, 0x9b)}${lerp(0xf0, 0x9f)}${lerp(0xe8, 0x92)}`;
 }
 
 function appColor(app: string): string {
-  return APP_COLORS[app] || '#6b7280';
+  return APP_COLORS[app] || '#d8ff6d';
 }
 
 function appInitial(app: string): string {
@@ -48,10 +103,28 @@ function appInitial(app: string): string {
 }
 
 function ageBorderColor(app: string, timestamp: number, isRead: boolean): string {
-  if (isRead) return '#1f2937';
+  if (isRead) return '#2a2d25';
 
-  const opacity = Math.round((1 - ageRatio(timestamp) * 0.7) * 255).toString(16).padStart(2, '0');
+  const opacity = Math.round((1 - ageRatio(timestamp) * 0.55) * 255).toString(16).padStart(2, '0');
   return appColor(app) + opacity;
+}
+
+function formatBattery(value?: string | number | null): string {
+  if (value === undefined || value === null || value === '') return '';
+
+  const text = String(value).trim();
+  if (!text) return '';
+
+  return text.endsWith('%') ? text : `${text}%`;
+}
+
+function latestBattery(notifications: Notification[]): string {
+  for (let i = 0; i < notifications.length; i += 1) {
+    const battery = formatBattery(notifications[i].battery);
+    if (battery) return battery;
+  }
+
+  return '';
 }
 
 function applyRules(notifications: Notification[], rules: Rule[]): Notification[] {
@@ -61,9 +134,7 @@ function applyRules(notifications: Notification[], rules: Rule[]): Notification[
       const value = String(notification[rule.field] || '').toLowerCase();
       const matched = value.includes(rule.value.toLowerCase());
 
-      if (!matched) {
-        continue;
-      }
+      if (!matched) continue;
 
       return rule.type === 'include';
     }
@@ -80,9 +151,7 @@ function groupNotifications(notifications: Notification[]): NotificationGroup[] 
   for (let i = 0; i < sorted.length; i += 1) {
     const notification = sorted[i];
 
-    if (used.has(notification.id)) {
-      continue;
-    }
+    if (used.has(notification.id)) continue;
 
     const key = `${notification.app}::${notification.sender}`;
     const burst: Notification[] = [];
@@ -127,12 +196,9 @@ function groupNotifications(notifications: Notification[]): NotificationGroup[] 
 function getOrCreateDeviceId(): string {
   const stored = localStorage.getItem(DEVICE_KEY);
 
-  if (stored) {
-    return stored;
-  }
+  if (stored) return stored;
 
   const created = Date.now().toString(36) + Math.random().toString(36).slice(2);
-
   localStorage.setItem(DEVICE_KEY, created);
 
   return created;
@@ -144,44 +210,68 @@ function AppBadge({ app }: { app: string }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      width: 22, height: 22, borderRadius: 4,
-      background: color + '22', border: `1px solid ${color}55`,
-      color, fontSize: 9, fontWeight: 700, letterSpacing: '0.05em',
-      fontFamily: 'monospace', flexShrink: 0,
+      width: 34, height: 34, borderRadius: 12,
+      background: color + '18', border: `1px solid ${color}55`,
+      color, fontSize: 11, fontWeight: 900, letterSpacing: '0.05em',
+      flexShrink: 0,
     }}>
       {appInitial(app)}
     </span>
   );
 }
 
+function Pill({ children, tone = 'muted' }: { children: React.ReactNode; tone?: 'muted' | 'hot' | 'green' | 'blue' }) {
+  const styles: Record<string, React.CSSProperties> = {
+    muted: { background: '#191b16', color: '#8c9081', border: '1px solid #2a2d25' },
+    hot: { background: '#332113', color: '#ffbf69', border: '1px solid #5b3a16' },
+    green: { background: '#1f2913', color: '#d8ff6d', border: '1px solid #3d4c1c' },
+    blue: { background: '#121f2d', color: '#8cc9ff', border: '1px solid #244563' },
+  };
+
+  return (
+    <span style={{
+      ...styles[tone],
+      display: 'inline-flex', alignItems: 'center', height: 24,
+      padding: '0 9px', borderRadius: 999, fontSize: 11, fontWeight: 750,
+      whiteSpace: 'nowrap', flexShrink: 0,
+    }}>
+      {children}
+    </span>
+  );
+}
+
 function NotifCard({ notif, isRead, onRead }: { notif: Notification; isRead: boolean; onRead: () => void }) {
+  const battery = formatBattery(notif.battery);
+
   return (
     <div onClick={onRead} style={{
-      padding: '8px 12px',
-      borderLeft: `2px solid ${ageBorderColor(notif.app, notif.timestamp, isRead)}`,
-      background: isRead ? 'transparent' : '#0d111799',
-      cursor: 'pointer', transition: 'background 0.15s',
+      padding: '15px 16px',
+      borderLeft: `3px solid ${ageBorderColor(notif.app, notif.timestamp, isRead)}`,
+      background: isRead ? '#10110e' : 'linear-gradient(135deg, #171914 0%, #10110e 72%)',
+      cursor: 'pointer',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 10 }}>
         <AppBadge app={notif.app} />
-        <span style={{ fontSize: 11, color: '#4b5563' }}>{notif.app}</span>
-        <span style={{ fontSize: 11, color: isRead ? '#4b5563' : '#9ca3af', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {notif.sender}
-        </span>
-        {notif.battery && (
-          <span style={{ fontSize: 10, color: '#f59e0b', background: '#451a03', padding: '1px 5px', borderRadius: 3, flexShrink: 0 }}>
-            {notif.battery}
-          </span>
-        )}
-        <span style={{ fontSize: 10, color: '#374151', flexShrink: 0 }}>{relativeTime(notif.timestamp)}</span>
-        {!isRead && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
+            <span style={{ fontSize: 13, color: isRead ? '#65695d' : '#d8ff6d', fontWeight: 850, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {notif.sender}
+            </span>
+            {!isRead && <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#d8ff6d', flexShrink: 0 }} />}
+          </div>
+          <div style={{ fontSize: 11, color: '#65695d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{notif.app}</div>
+        </div>
+        {battery && <Pill tone="hot">{battery}</Pill>}
+        <Pill>{relativeTime(notif.timestamp)}</Pill>
       </div>
+
       {notif.title && (
-        <div style={{ fontSize: 11, color: isRead ? '#374151' : '#d1d5db', fontWeight: 600, marginBottom: 2, paddingLeft: 30, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ fontSize: 13, color: isRead ? '#7b7f72' : '#f4f0e8', fontWeight: 800, marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {notif.title}
         </div>
       )}
-      <div style={{ fontSize: 12, color: ageColor(notif.timestamp, isRead), paddingLeft: 30, lineHeight: 1.5 }}>
+
+      <div style={{ fontSize: 14, color: ageColor(notif.timestamp, isRead), lineHeight: 1.52, wordBreak: 'break-word' }}>
         {notif.content}
       </div>
     </div>
@@ -199,6 +289,7 @@ function GroupCard({ group, readMap, onRead, expandedKey, onToggleExpand }: {
   const allRead = group.items.every((notification: Notification) => readMap[notification.id]);
   const unreadCount = group.items.filter((notification: Notification) => !readMap[notification.id]).length;
   const latest = group.items[0];
+  const battery = latestBattery(group.items);
 
   function handleToggle(): void {
     onToggleExpand(isExpanded ? null : group.key);
@@ -211,28 +302,37 @@ function GroupCard({ group, readMap, onRead, expandedKey, onToggleExpand }: {
   }
 
   return (
-    <div style={{ borderLeft: `2px solid ${ageBorderColor(group.app, group.timestamp, allRead)}`, background: allRead ? 'transparent' : '#0d111799' }}>
-      <div onClick={handleToggle} style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{
+      borderLeft: `3px solid ${ageBorderColor(group.app, group.timestamp, allRead)}`,
+      background: allRead ? '#10110e' : 'linear-gradient(135deg, #171914 0%, #10110e 72%)',
+    }}>
+      <div onClick={handleToggle} style={{ padding: '15px 16px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 11 }}>
         <AppBadge app={group.app} />
-        <span style={{ fontSize: 11, color: '#4b5563' }}>{group.app}</span>
-        <span style={{ fontSize: 11, color: allRead ? '#4b5563' : '#9ca3af', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {group.sender}
-        </span>
-        <span style={{ fontSize: 9, color: '#3b82f6', background: '#1e3a5f', padding: '1px 5px', borderRadius: 3, flexShrink: 0 }}>
-          {isExpanded ? '▾' : '▸'} {group.items.length}
-        </span>
-        {unreadCount > 0 && <span style={{ fontSize: 9, color: '#f59e0b', background: '#451a03', padding: '1px 5px', borderRadius: 3, flexShrink: 0 }}>{unreadCount}</span>}
-        <span style={{ fontSize: 10, color: '#374151', flexShrink: 0 }}>{relativeTime(latest.timestamp)}</span>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <span style={{ fontSize: 13, color: allRead ? '#65695d' : '#d8ff6d', fontWeight: 850, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {group.sender}
+            </span>
+            {unreadCount > 0 && <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#d8ff6d', flexShrink: 0 }} />}
+          </div>
+          <div style={{ fontSize: 11, color: '#65695d', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.app}</div>
+        </div>
+        {battery && <Pill tone="hot">{battery}</Pill>}
+        <Pill tone="blue">{isExpanded ? 'open' : 'stack'} {group.items.length}</Pill>
+        {unreadCount > 0 && <Pill tone="green">{unreadCount} new</Pill>}
+        <Pill>{relativeTime(latest.timestamp)}</Pill>
       </div>
+
       {!isExpanded && (
-        <div style={{ paddingLeft: 42, paddingBottom: 8, paddingRight: 12, fontSize: 12, color: ageColor(latest.timestamp, allRead), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ padding: '0 16px 15px 61px', fontSize: 14, color: ageColor(latest.timestamp, allRead), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {latest.content}
         </div>
       )}
+
       {isExpanded && (
-        <div style={{ borderTop: '1px solid #1a2030' }}>
+        <div style={{ borderTop: '1px solid #252820', marginTop: 3 }}>
           {group.items.map((notification: Notification) => (
-            <div key={notification.id} style={{ paddingLeft: 16, borderBottom: '1px solid #0f1318' }}>
+            <div key={notification.id} style={{ paddingLeft: 18, borderBottom: '1px solid #171914' }}>
               <NotifCard notif={notification} isRead={!!readMap[notification.id]} onRead={() => onRead(notification.id)} />
             </div>
           ))}
@@ -261,52 +361,28 @@ function RuleRow({ rule, index, onRemove, onDragStart, onDragOver, onDragEnd }: 
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4,
-        padding: '5px 6px', borderRadius: 3, fontSize: 11,
-        background: hovered ? '#0f1520' : 'transparent',
-        border: '1px solid ' + (hovered ? '#1f2937' : 'transparent'),
-        cursor: 'grab', userSelect: 'none', transition: 'background 0.1s',
+        display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6,
+        padding: '8px 9px', borderRadius: 12, fontSize: 12,
+        background: hovered ? '#191b16' : '#11130f',
+        border: '1px solid ' + (hovered ? '#3a3e32' : '#24271f'),
+        cursor: 'grab', userSelect: 'none',
       }}
     >
-      <span style={{ color: '#2a3040', fontSize: 10, flexShrink: 0 }}>⠿</span>
+      <span style={{ color: '#65695d', fontSize: 12, flexShrink: 0 }}>⠿</span>
       <span style={{
-        padding: '1px 5px', borderRadius: 3, fontSize: 9, flexShrink: 0,
-        background: rule.type === 'exclude' ? '#450a0a' : '#052e16',
-        color: rule.type === 'exclude' ? '#f87171' : '#4ade80',
+        padding: '3px 7px', borderRadius: 999, fontSize: 10, fontWeight: 850, flexShrink: 0,
+        background: rule.type === 'exclude' ? '#331818' : '#1f2913',
+        color: rule.type === 'exclude' ? '#ff8f8f' : '#d8ff6d',
       }}>{rule.type}</span>
-      <span style={{ color: '#6b7280', flexShrink: 0 }}>{rule.field}</span>
-      <span style={{ color: '#d1d5db', fontWeight: 600, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span style={{ color: '#8c9081', flexShrink: 0 }}>{rule.field}</span>
+      <span style={{ color: '#f4f0e8', fontWeight: 700, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         &quot;{rule.value}&quot;
       </span>
-      <span style={{ fontSize: 9, color: '#2a3040', flexShrink: 0 }}>#{index + 1}</span>
-      <span onClick={() => onRemove(rule.id)} style={{ color: '#4b5563', cursor: 'pointer', fontSize: 10, padding: '0 2px', flexShrink: 0 }}>✕</span>
+      <span style={{ fontSize: 10, color: '#65695d', flexShrink: 0 }}>#{index + 1}</span>
+      <span onClick={() => onRemove(rule.id)} style={{ color: '#8c9081', cursor: 'pointer', fontSize: 12, padding: '0 3px', flexShrink: 0 }}>×</span>
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  background: '#080b0f', border: '1px solid #1a2030',
-  color: '#e5e7eb', padding: '4px 8px', fontSize: 11,
-  borderRadius: 3, fontFamily: 'inherit', outline: 'none',
-};
-
-const selectStyle: React.CSSProperties = {
-  background: '#080b0f', border: '1px solid #1a2030',
-  color: '#6b7280', padding: '4px 6px', fontSize: 10,
-  borderRadius: 3, fontFamily: 'inherit', outline: 'none',
-};
-
-const btnGhostStyle: React.CSSProperties = {
-  background: 'transparent', border: '1px solid #1f2937',
-  color: '#4b5563', padding: '3px 10px', borderRadius: 3,
-  cursor: 'pointer', fontSize: 10, fontFamily: 'inherit',
-};
-
-const btnPrimaryStyle: React.CSSProperties = {
-  background: '#1d3a6e', border: 'none', color: '#93c5fd',
-  padding: '4px 12px', borderRadius: 3, cursor: 'pointer',
-  fontSize: 10, fontFamily: 'inherit',
-};
 
 export default function App() {
   const [deviceId] = useState(getOrCreateDeviceId);
@@ -338,13 +414,8 @@ export default function App() {
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-
-    if (response.status === 204) {
-      return undefined as T;
-    }
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    if (response.status === 204) return undefined as T;
 
     return response.json() as Promise<T>;
   }
@@ -398,10 +469,7 @@ export default function App() {
       const notification = JSON.parse((event as MessageEvent).data) as Notification;
 
       setNotifications((previous: Notification[]) => {
-        if (previous.some((item: Notification) => item.id === notification.id)) {
-          return previous;
-        }
-
+        if (previous.some((item: Notification) => item.id === notification.id)) return previous;
         return [notification, ...previous];
       });
     });
@@ -442,11 +510,8 @@ export default function App() {
     if (!element) return;
 
     const remaining = element.scrollHeight - element.scrollTop - element.clientHeight;
-    if (remaining < 120) {
-      loadMore();
-    }
+    if (remaining < 120) loadMore();
   }
-
 
   function markRead(id: number): void {
     setReadMap((previous: ReadMap) => ({ ...previous, [id]: true }));
@@ -575,35 +640,47 @@ export default function App() {
   }
 
   const totalUnread = notifications.filter((notification: Notification) => !readMap[notification.id]).length;
+  const filteredUnread = filtered.filter((notification: Notification) => !readMap[notification.id]).length;
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#080b0f', color: '#e5e7eb', fontFamily: "'IBM Plex Mono','Fira Code','Cascadia Code',monospace", fontSize: 15, overflow: 'hidden', position: 'relative' }}>
-      {isMobile && drawerOpen && <div onClick={() => setDrawerOpen(false)} style={{ position: 'fixed', inset: 0, background: '#000000aa', zIndex: 40 }} />}
+    <div style={pageStyle}>
+      {isMobile && drawerOpen && <div onClick={() => setDrawerOpen(false)} style={{ position: 'fixed', inset: 0, background: '#000000b8', zIndex: 40 }} />}
 
-      <div style={{
-        width: 320, background: '#0a0e14', borderRight: '1px solid #141920',
-        flexShrink: 0, zIndex: 50,
+      <aside style={{
+        width: 316,
+        background: '#0f110d',
+        borderRight: '1px solid #24271f',
+        flexShrink: 0,
+        zIndex: 50,
         ...(isMobile ? {
           position: 'fixed' as const, top: 0, left: 0, bottom: 0,
           transform: drawerOpen ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.22s cubic-bezier(0.4,0,0.2,1)',
-          boxShadow: drawerOpen ? '4px 0 24px #000000cc' : 'none',
+          boxShadow: drawerOpen ? '16px 0 42px #000000cc' : 'none',
         } : {}),
       }}>
         {isMobile && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 12px 0' }}>
-            <button onClick={() => setDrawerOpen(false)} style={{ background: 'none', border: 'none', color: '#4b5563', cursor: 'pointer', fontSize: 20, padding: 4 }}>✕</button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 14px 0' }}>
+            <button onClick={() => setDrawerOpen(false)} style={{ ...btnGhostStyle, width: 38, height: 38, padding: 0 }}>×</button>
           </div>
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-          <div style={{ padding: '20px 18px 16px', borderBottom: '1px solid #141920', flexShrink: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#f3f4f6', letterSpacing: '0.1em' }}>NOTIFEED</div>
-            <div style={{ fontSize: 11, color: '#374151', marginTop: 3 }}>v0.1.0 · live</div>
+          <div style={{ padding: '24px 22px 20px', borderBottom: '1px solid #24271f', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 14, background: '#d8ff6d', color: '#11130f', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 950 }}>NF</div>
+              <div>
+                <div style={{ fontSize: 17, fontWeight: 900, letterSpacing: '-0.04em' }}>Notifeed</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
+              <Pill tone={backendStatus === 'connected' ? 'green' : 'hot'}>{backendStatus}</Pill>
+              <Pill>{totalUnread} unread</Pill>
+            </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 0' }}>
-            <div style={{ padding: '6px 18px 6px', fontSize: 11, color: '#374151', letterSpacing: '0.12em' }}>CHANNELS</div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '18px 14px' }}>
+            <div style={{ padding: '0 8px 9px', fontSize: 11, color: '#65695d', fontWeight: 850, letterSpacing: '0.14em' }}>CHANNELS</div>
             {channels.map((channel: string) => {
               const unread = unreadInChannel(channel);
               const active = activeChannel === channel;
@@ -612,53 +689,53 @@ export default function App() {
                   key={channel}
                   onClick={() => { setActiveChannel(channel); if (isMobile) setDrawerOpen(false); }}
                   style={{
-                    padding: '10px 18px', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    background: active ? '#111827' : 'transparent',
-                    borderLeft: active ? '3px solid #3b82f6' : '3px solid transparent',
-                    color: active ? '#93c5fd' : '#6b7280',
-                    transition: 'all 0.1s',
+                    padding: '11px 12px', cursor: 'pointer', borderRadius: 14,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                    background: active ? '#1c2015' : 'transparent',
+                    border: active ? '1px solid #384329' : '1px solid transparent',
+                    color: active ? '#f4f0e8' : '#8c9081',
+                    marginBottom: 5,
                   }}
                 >
-                  <span style={{ fontSize: 13 }}># {channel}</span>
-                  {unread > 0 && <span style={{ fontSize: 11, background: '#1e3a5f', color: '#60a5fa', padding: '2px 8px', borderRadius: 4 }}>{unread}</span>}
+                  <span style={{ fontSize: 14, fontWeight: active ? 850 : 650, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}># {channel}</span>
+                  {unread > 0 && <Pill tone="green">{unread}</Pill>}
                 </div>
               );
             })}
 
-            <div style={{ padding: '12px 18px 6px', borderTop: '1px solid #141920', marginTop: 8 }}>
-              <div onClick={() => setShowChannelMgr((value: boolean) => !value)} style={{ fontSize: 12, color: '#4b5563', cursor: 'pointer', marginBottom: showChannelMgr ? 10 : 0 }}>
-                {showChannelMgr ? '▾' : '▸'} manage channels
+            <section style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #24271f' }}>
+              <div onClick={() => setShowChannelMgr((value: boolean) => !value)} style={{ padding: '0 8px 10px', fontSize: 12, color: '#8c9081', cursor: 'pointer', fontWeight: 800 }}>
+                {showChannelMgr ? '−' : '+'} manage channels
               </div>
               {showChannelMgr && (
-                <div>
+                <div style={{ padding: '0 4px' }}>
                   {channels.filter((channel: string) => channel !== 'all').map((channel: string) => (
-                    <div key={channel} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: '#6b7280' }}># {channel}</span>
-                      <span onClick={() => removeChannel(channel)} style={{ fontSize: 11, color: '#7f1d1d', cursor: 'pointer', padding: '2px 6px' }}>✕</span>
+                    <div key={channel} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7, padding: '8px 10px', background: '#11130f', border: '1px solid #24271f', borderRadius: 12 }}>
+                      <span style={{ fontSize: 12, color: '#a7aa9b' }}># {channel}</span>
+                      <span onClick={() => removeChannel(channel)} style={{ fontSize: 13, color: '#ff8f8f', cursor: 'pointer', padding: '0 4px' }}>×</span>
                     </div>
                   ))}
-                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                    <input value={newChannel} onChange={(event) => setNewChannel(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && addChannel()} placeholder="new channel" style={inputStyle} />
-                    <button onClick={addChannel} style={btnPrimaryStyle}>+</button>
+                  <div style={{ display: 'flex', gap: 7, marginTop: 10 }}>
+                    <input value={newChannel} onChange={(event) => setNewChannel(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && addChannel()} placeholder="new channel" style={{ ...inputStyle, minWidth: 0, flex: 1 }} />
+                    <button onClick={addChannel} style={btnPrimaryStyle}>add</button>
                   </div>
                 </div>
               )}
-            </div>
+            </section>
 
-            <div style={{ padding: '12px 18px 6px', borderTop: '1px solid #141920', marginTop: 8 }}>
-              <div onClick={() => setShowRules((value: boolean) => !value)} style={{ fontSize: 12, color: '#4b5563', cursor: 'pointer', marginBottom: showRules ? 10 : 0, display: 'flex', justifyContent: 'space-between' }}>
-                <span>{showRules ? '▾' : '▸'} filter rules</span>
-                {rules.length > 0 && <span style={{ fontSize: 11, background: '#1e3a5f', color: '#60a5fa', padding: '2px 8px', borderRadius: 4 }}>{rules.length}</span>}
+            <section style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid #24271f' }}>
+              <div onClick={() => setShowRules((value: boolean) => !value)} style={{ padding: '0 8px 10px', fontSize: 12, color: '#8c9081', cursor: 'pointer', fontWeight: 800, display: 'flex', justifyContent: 'space-between' }}>
+                <span>{showRules ? '−' : '+'} filter rules</span>
+                {rules.length > 0 && <Pill tone="blue">{rules.length}</Pill>}
               </div>
               {showRules && (
-                <div>
-                  {rules.length === 0 && <div style={{ fontSize: 12, color: '#1f2937', marginBottom: 10 }}>no rules — add one below</div>}
+                <div style={{ padding: '0 4px' }}>
+                  {rules.length === 0 && <div style={{ fontSize: 12, color: '#65695d', marginBottom: 10 }}>no active rules</div>}
                   {rules.map((rule: Rule, index: number) => (
                     <RuleRow key={rule.id} rule={rule} index={index} onRemove={removeRule} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} />
                   ))}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
-                    <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                    <div style={{ display: 'flex', gap: 8 }}>
                       <select value={newRule.type} onChange={(event) => setNewRule((rule: NewRule) => ({ ...rule, type: event.target.value as RuleType }))} style={{ ...selectStyle, flex: 1 }}>
                         <option value="exclude">exclude</option>
                         <option value="include">include</option>
@@ -669,62 +746,65 @@ export default function App() {
                         <option value="app">app</option>
                       </select>
                     </div>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <input value={newRule.value} onChange={(event) => setNewRule((rule: NewRule) => ({ ...rule, value: event.target.value }))} onKeyDown={(event) => event.key === 'Enter' && addRule()} placeholder="value..." style={{ ...inputStyle, flex: 1 }} />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input value={newRule.value} onChange={(event) => setNewRule((rule: NewRule) => ({ ...rule, value: event.target.value }))} onKeyDown={(event) => event.key === 'Enter' && addRule()} placeholder="value" style={{ ...inputStyle, flex: 1, minWidth: 0 }} />
                       <button onClick={addRule} style={btnPrimaryStyle}>add</button>
                     </div>
                   </div>
                 </div>
               )}
-            </div>
+            </section>
           </div>
         </div>
-      </div>
+      </aside>
 
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-        <div style={{ borderBottom: '1px solid #141920', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, background: '#0a0e14', flexShrink: 0 }}>
-          {isMobile && <button onClick={() => setDrawerOpen(true)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: 16, padding: '2px 4px', flexShrink: 0, lineHeight: 1 }}>☰</button>}
-          <span style={{ fontSize: 11, color: '#374151', flexShrink: 0 }}># {activeChannel}</span>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="search..." style={{ ...inputStyle, flex: 1, minWidth: 0 }} />
-          {isMobile && totalUnread > 0 && <span style={{ fontSize: 9, background: '#1d3a6e', color: '#93c5fd', padding: '2px 6px', borderRadius: 3, fontWeight: 700, flexShrink: 0 }}>{totalUnread}</span>}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        <header style={{
+          borderBottom: '1px solid #24271f',
+          padding: isMobile ? '12px' : '18px 22px',
+          display: 'flex', alignItems: 'center', gap: 12,
+          background: '#0b0c0a', flexShrink: 0,
+        }}>
+          {isMobile && <button onClick={() => setDrawerOpen(true)} style={{ ...btnGhostStyle, width: 40, height: 40, padding: 0, flexShrink: 0 }}>☰</button>}
+          <div style={{ minWidth: 0, flexShrink: 0 }}>
+            <div style={{ fontSize: isMobile ? 15 : 20, fontWeight: 950, letterSpacing: '-0.04em' }}>#{activeChannel}</div>
+            {!isMobile && <div style={{ fontSize: 12, color: '#65695d', marginTop: 2 }}>{visibleGroups.length} groups · {filteredUnread} unread</div>}
+          </div>
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="search app, sender, title, content" style={{ ...inputStyle, flex: 1, minWidth: 0 }} />
           {!isMobile && (
-            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: 7, flexShrink: 0, maxWidth: 420, overflowX: 'auto' }}>
               {appsInView.map((app: string) => {
                 const collapsed = collapsedApps.has(app);
                 return (
                   <button key={app} onClick={() => toggleCollapseApp(app)} title={collapsed ? `show ${app}` : `hide ${app}`} style={{
-                    background: collapsed ? '#1a1f2e' : appColor(app) + '18',
-                    border: `1px solid ${collapsed ? '#1f2937' : appColor(app) + '44'}`,
-                    color: collapsed ? '#374151' : appColor(app),
-                    padding: '3px 7px', borderRadius: 3, cursor: 'pointer',
-                    fontSize: 9, fontFamily: 'inherit', transition: 'all 0.15s',
+                    background: collapsed ? '#11130f' : appColor(app) + '18',
+                    border: `1px solid ${collapsed ? '#2a2d25' : appColor(app) + '66'}`,
+                    color: collapsed ? '#65695d' : appColor(app),
+                    padding: '8px 11px', borderRadius: 999, cursor: 'pointer',
+                    fontSize: 12, fontFamily: 'inherit', fontWeight: 800,
                     textDecoration: collapsed ? 'line-through' : 'none',
+                    whiteSpace: 'nowrap',
                   }}>{app}</button>
                 );
               })}
             </div>
           )}
-          {!isMobile && (
-            <>
-              <span style={{ fontSize: 10, color: '#374151', whiteSpace: 'nowrap', flexShrink: 0 }}>{visibleGroups.length} · {filtered.filter((notification: Notification) => !readMap[notification.id]).length} unread</span>
-              <button onClick={markAllRead} style={{ ...btnGhostStyle, flexShrink: 0 }}>mark all read</button>
-            </>
-          )}
-          {isMobile && <button onClick={markAllRead} style={{ ...btnGhostStyle, flexShrink: 0, whiteSpace: 'nowrap' }}>✓ all</button>}
-        </div>
+          {!isMobile && <button onClick={markAllRead} style={{ ...btnGhostStyle, flexShrink: 0 }}>mark all read</button>}
+          {isMobile && totalUnread > 0 && <Pill tone="green">{totalUnread}</Pill>}
+          {isMobile && <button onClick={markAllRead} style={{ ...btnGhostStyle, flexShrink: 0 }}>read</button>}
+        </header>
 
         {isMobile && appsInView.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, padding: '6px 12px', borderBottom: '1px solid #141920', background: '#080b0f', overflowX: 'auto', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 7, padding: '10px 12px', borderBottom: '1px solid #24271f', background: '#0b0c0a', overflowX: 'auto', flexShrink: 0 }}>
             {appsInView.map((app: string) => {
               const collapsed = collapsedApps.has(app);
               return (
                 <button key={app} onClick={() => toggleCollapseApp(app)} style={{
-                  background: collapsed ? '#1a1f2e' : appColor(app) + '18',
-                  border: `1px solid ${collapsed ? '#1f2937' : appColor(app) + '44'}`,
-                  color: collapsed ? '#374151' : appColor(app),
-                  padding: '3px 8px', borderRadius: 3, cursor: 'pointer',
-                  fontSize: 9, fontFamily: 'inherit', flexShrink: 0,
+                  background: collapsed ? '#11130f' : appColor(app) + '18',
+                  border: `1px solid ${collapsed ? '#2a2d25' : appColor(app) + '66'}`,
+                  color: collapsed ? '#65695d' : appColor(app),
+                  padding: '8px 11px', borderRadius: 999, cursor: 'pointer',
+                  fontSize: 12, fontFamily: 'inherit', fontWeight: 800, flexShrink: 0,
                   textDecoration: collapsed ? 'line-through' : 'none',
                 }}>{app}</button>
               );
@@ -732,27 +812,29 @@ export default function App() {
           </div>
         )}
 
-        <div ref={feedRef} onScroll={handleFeedScroll} style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div ref={feedRef} onScroll={handleFeedScroll} style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: isMobile ? 10 : 18 }}>
           {visibleGroups.length === 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#1f2937', fontSize: 12 }}>no notifications</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#65695d', fontSize: 14 }}>no notifications</div>
           )}
-          {visibleGroups.map((group: NotificationGroup) => (
-            <div key={group.key} style={{ borderBottom: '1px solid #0d1117' }}>
-              {group.type === 'group' ? (
-                <GroupCard group={group} readMap={readMap} onRead={markRead} expandedKey={expandedKey} onToggleExpand={setExpandedKey} />
-              ) : (
-                <NotifCard notif={group.item} isRead={!!readMap[group.item.id]} onRead={() => markRead(group.item.id)} />
-              )}
-            </div>
-          ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 1040, margin: '0 auto' }}>
+            {visibleGroups.map((group: NotificationGroup) => (
+              <div key={group.key} style={{ border: '1px solid #24271f', borderRadius: 18, overflow: 'hidden', boxShadow: '0 16px 50px #00000033' }}>
+                {group.type === 'group' ? (
+                  <GroupCard group={group} readMap={readMap} onRead={markRead} expandedKey={expandedKey} onToggleExpand={setExpandedKey} />
+                ) : (
+                  <NotifCard notif={group.item} isRead={!!readMap[group.item.id]} onRead={() => markRead(group.item.id)} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div style={{ borderTop: '1px solid #141920', padding: '3px 12px', display: 'flex', gap: 12, background: '#0a0e14', flexShrink: 0 }}>
-          <span style={{ fontSize: 9, color: '#1f2937' }}>NOTIFEED</span>
-          <span style={{ fontSize: 9, color: '#1f2937', marginLeft: 'auto' }}>backend: <span style={{ color: '#374151' }}>{backendStatus}</span></span>
-          <span style={{ fontSize: 9, color: '#1f2937' }}>rules: {rules.length}</span>
-        </div>
-      </div>
+        <footer style={{ borderTop: '1px solid #24271f', padding: '7px 14px', display: 'flex', gap: 12, background: '#0f110d', flexShrink: 0, alignItems: 'center' }}>
+          <span style={{ fontSize: 11, color: '#65695d', fontWeight: 900 }}>NOTIFEED</span>
+          <span style={{ fontSize: 11, color: '#65695d', marginLeft: 'auto' }}>backend: <span style={{ color: backendStatus === 'connected' ? '#d8ff6d' : '#ffbf69' }}>{backendStatus}</span></span>
+          <span style={{ fontSize: 11, color: '#65695d' }}>rules: {rules.length}</span>
+        </footer>
+      </main>
     </div>
   );
 }
