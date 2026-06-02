@@ -27,7 +27,11 @@ app.get('/api/health', (_request, response) => {
   response.json({ ok: true });
 });
 
-const publicPath = path.join(__dirname, '../client/dist');
+const isProduction = process.env.NODE_ENV === 'production';
+const publicPath = isProduction
+  ? path.join(__dirname, '../../public')
+  : path.join(__dirname, '../client/dist');
+
 app.use(express.static(publicPath));
 app.get('*', (_request, response) => {
   response.sendFile(path.join(publicPath, 'index.html'));
