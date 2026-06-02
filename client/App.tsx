@@ -17,6 +17,7 @@ const APP_COLORS: Record<string, string> = {
   Telegram: '#4cb3ff',
   Slack: '#e36ad6',
   SMS: '#b99cff',
+  Discord: '#5865f2',
 };
 
 const pageStyle: React.CSSProperties = {
@@ -282,7 +283,7 @@ function NotifCard({ notif, isRead, onRead }: { notif: Notification; isRead: boo
         <AppBadge app={notif.app} />
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-            <span style={{ fontSize: 13, color: isRead ? '#65695d' : '#d8ff6d', fontWeight: 850, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 13, color: isRead ? '#65695d' : appColor(notif.app), fontWeight: 850, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {notif.sender}
             </span>
             {!isRead && <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#d8ff6d', flexShrink: 0 }} />}
@@ -365,7 +366,7 @@ function GroupCard({ group, readMap, onRead, expandedKey, onToggleExpand }: {
             <span
               style={{
                 fontSize: 13,
-                color: allRead ? '#65695d' : '#d8ff6d',
+                color: allRead ? '#65695d' : appColor(group.app),
                 fontWeight: 850,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
