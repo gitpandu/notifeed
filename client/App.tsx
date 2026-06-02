@@ -577,11 +577,11 @@ export default function App() {
   const totalUnread = notifications.filter((notification: Notification) => !readMap[notification.id]).length;
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#080b0f', color: '#e5e7eb', fontFamily: "'IBM Plex Mono','Fira Code','Cascadia Code',monospace", fontSize: 13, overflow: 'hidden', position: 'relative' }}>
+    <div style={{ display: 'flex', height: '100vh', background: '#080b0f', color: '#e5e7eb', fontFamily: "'IBM Plex Mono','Fira Code','Cascadia Code',monospace", fontSize: 15, overflow: 'hidden', position: 'relative' }}>
       {isMobile && drawerOpen && <div onClick={() => setDrawerOpen(false)} style={{ position: 'fixed', inset: 0, background: '#000000aa', zIndex: 40 }} />}
 
       <div style={{
-        width: 280, background: '#0a0e14', borderRight: '1px solid #141920',
+        width: 320, background: '#0a0e14', borderRight: '1px solid #141920',
         flexShrink: 0, zIndex: 50,
         ...(isMobile ? {
           position: 'fixed' as const, top: 0, left: 0, bottom: 0,
@@ -592,18 +592,18 @@ export default function App() {
       }}>
         {isMobile && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 12px 0' }}>
-            <button onClick={() => setDrawerOpen(false)} style={{ background: 'none', border: 'none', color: '#4b5563', cursor: 'pointer', fontSize: 16, padding: 4 }}>✕</button>
+            <button onClick={() => setDrawerOpen(false)} style={{ background: 'none', border: 'none', color: '#4b5563', cursor: 'pointer', fontSize: 20, padding: 4 }}>✕</button>
           </div>
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 14px 12px', borderBottom: '1px solid #141920', flexShrink: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#f3f4f6', letterSpacing: '0.1em' }}>NOTIFEED</div>
-            <div style={{ fontSize: 9, color: '#374151', marginTop: 1 }}>v0.1.0 · live</div>
+          <div style={{ padding: '20px 18px 16px', borderBottom: '1px solid #141920', flexShrink: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#f3f4f6', letterSpacing: '0.1em' }}>NOTIFEED</div>
+            <div style={{ fontSize: 11, color: '#374151', marginTop: 3 }}>v0.1.0 · live</div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-            <div style={{ padding: '4px 14px 4px', fontSize: 9, color: '#374151', letterSpacing: '0.12em' }}>CHANNELS</div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 0' }}>
+            <div style={{ padding: '6px 18px 6px', fontSize: 11, color: '#374151', letterSpacing: '0.12em' }}>CHANNELS</div>
             {channels.map((channel: string) => {
               const unread = unreadInChannel(channel);
               const active = activeChannel === channel;
@@ -612,33 +612,33 @@ export default function App() {
                   key={channel}
                   onClick={() => { setActiveChannel(channel); if (isMobile) setDrawerOpen(false); }}
                   style={{
-                    padding: '7px 14px', cursor: 'pointer',
+                    padding: '10px 18px', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     background: active ? '#111827' : 'transparent',
-                    borderLeft: active ? '2px solid #3b82f6' : '2px solid transparent',
-                    color: active ? '#93c5fd' : '#4b5563',
+                    borderLeft: active ? '3px solid #3b82f6' : '3px solid transparent',
+                    color: active ? '#93c5fd' : '#6b7280',
                     transition: 'all 0.1s',
                   }}
                 >
-                  <span style={{ fontSize: 11 }}># {channel}</span>
-                  {unread > 0 && <span style={{ fontSize: 9, background: '#1e3a5f', color: '#60a5fa', padding: '1px 5px', borderRadius: 3 }}>{unread}</span>}
+                  <span style={{ fontSize: 13 }}># {channel}</span>
+                  {unread > 0 && <span style={{ fontSize: 11, background: '#1e3a5f', color: '#60a5fa', padding: '2px 8px', borderRadius: 4 }}>{unread}</span>}
                 </div>
               );
             })}
 
-            <div style={{ padding: '8px 14px 4px', borderTop: '1px solid #141920', marginTop: 4 }}>
-              <div onClick={() => setShowChannelMgr((value: boolean) => !value)} style={{ fontSize: 10, color: '#374151', cursor: 'pointer', marginBottom: showChannelMgr ? 8 : 0 }}>
+            <div style={{ padding: '12px 18px 6px', borderTop: '1px solid #141920', marginTop: 8 }}>
+              <div onClick={() => setShowChannelMgr((value: boolean) => !value)} style={{ fontSize: 12, color: '#4b5563', cursor: 'pointer', marginBottom: showChannelMgr ? 10 : 0 }}>
                 {showChannelMgr ? '▾' : '▸'} manage channels
               </div>
               {showChannelMgr && (
                 <div>
                   {channels.filter((channel: string) => channel !== 'all').map((channel: string) => (
-                    <div key={channel} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: 10, color: '#4b5563' }}># {channel}</span>
-                      <span onClick={() => removeChannel(channel)} style={{ fontSize: 9, color: '#7f1d1d', cursor: 'pointer', padding: '2px 4px' }}>✕</span>
+                    <div key={channel} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontSize: 12, color: '#6b7280' }}># {channel}</span>
+                      <span onClick={() => removeChannel(channel)} style={{ fontSize: 11, color: '#7f1d1d', cursor: 'pointer', padding: '2px 6px' }}>✕</span>
                     </div>
                   ))}
-                  <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                     <input value={newChannel} onChange={(event) => setNewChannel(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && addChannel()} placeholder="new channel" style={inputStyle} />
                     <button onClick={addChannel} style={btnPrimaryStyle}>+</button>
                   </div>
@@ -646,19 +646,19 @@ export default function App() {
               )}
             </div>
 
-            <div style={{ padding: '8px 14px 4px', borderTop: '1px solid #141920', marginTop: 4 }}>
-              <div onClick={() => setShowRules((value: boolean) => !value)} style={{ fontSize: 10, color: '#374151', cursor: 'pointer', marginBottom: showRules ? 8 : 0, display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ padding: '12px 18px 6px', borderTop: '1px solid #141920', marginTop: 8 }}>
+              <div onClick={() => setShowRules((value: boolean) => !value)} style={{ fontSize: 12, color: '#4b5563', cursor: 'pointer', marginBottom: showRules ? 10 : 0, display: 'flex', justifyContent: 'space-between' }}>
                 <span>{showRules ? '▾' : '▸'} filter rules</span>
-                {rules.length > 0 && <span style={{ fontSize: 9, background: '#1e3a5f', color: '#60a5fa', padding: '1px 5px', borderRadius: 3 }}>{rules.length}</span>}
+                {rules.length > 0 && <span style={{ fontSize: 11, background: '#1e3a5f', color: '#60a5fa', padding: '2px 8px', borderRadius: 4 }}>{rules.length}</span>}
               </div>
               {showRules && (
                 <div>
-                  {rules.length === 0 && <div style={{ fontSize: 10, color: '#1f2937', marginBottom: 8 }}>no rules — add one below</div>}
+                  {rules.length === 0 && <div style={{ fontSize: 12, color: '#1f2937', marginBottom: 10 }}>no rules — add one below</div>}
                   {rules.map((rule: Rule, index: number) => (
                     <RuleRow key={rule.id} rule={rule} index={index} onRemove={removeRule} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} />
                   ))}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
-                    <div style={{ display: 'flex', gap: 4 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
                       <select value={newRule.type} onChange={(event) => setNewRule((rule: NewRule) => ({ ...rule, type: event.target.value as RuleType }))} style={{ ...selectStyle, flex: 1 }}>
                         <option value="exclude">exclude</option>
                         <option value="include">include</option>
@@ -669,7 +669,7 @@ export default function App() {
                         <option value="app">app</option>
                       </select>
                     </div>
-                    <div style={{ display: 'flex', gap: 4 }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
                       <input value={newRule.value} onChange={(event) => setNewRule((rule: NewRule) => ({ ...rule, value: event.target.value }))} onKeyDown={(event) => event.key === 'Enter' && addRule()} placeholder="value..." style={{ ...inputStyle, flex: 1 }} />
                       <button onClick={addRule} style={btnPrimaryStyle}>add</button>
                     </div>
@@ -680,6 +680,7 @@ export default function App() {
           </div>
         </div>
       </div>
+
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
         <div style={{ borderBottom: '1px solid #141920', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, background: '#0a0e14', flexShrink: 0 }}>
