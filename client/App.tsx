@@ -370,7 +370,8 @@ function GroupCard({ group, readMap, onRead, expandedKey, onToggleExpand }: {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                flex: 1,
+                flexShrink: 1,
+                minWidth: 0,
               }}
             >
               {group.sender}
