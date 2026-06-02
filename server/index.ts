@@ -27,7 +27,7 @@ app.get('/api/health', (_request, response) => {
   response.json({ ok: true });
 });
 
-const publicPath = path.join(__dirname, '../../public');
+const publicPath = path.join(__dirname, '../client/dist');
 app.use(express.static(publicPath));
 app.get('*', (_request, response) => {
   response.sendFile(path.join(publicPath, 'index.html'));
